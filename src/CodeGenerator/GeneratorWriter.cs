@@ -19,6 +19,7 @@ namespace CodeGenerator
         private readonly IWriter writer;
         private readonly string current_namespace;
         private readonly string current_static_class;
+        private readonly string fixed_namespace;
         private readonly int total_lines;
         private bool printedHeaders = false;
         public GeneratorWriter(IWriter writer, string current_namespace, int total_lines)
@@ -27,6 +28,14 @@ namespace CodeGenerator
             this.current_namespace = current_namespace;
             this.current_static_class = current_namespace.Split(".")[^1];
             if (names.Contains(current_static_class)) current_static_class = "@" + current_static_class;
+            if (current_namespace.Split(".")[^1] != current_static_class)
+            {
+                fixed_namespace = current_namespace.Replace(".", ".@");
+            }
+            else
+            {
+                fixed_namespace = current_namespace;
+            }
             this.total_lines = total_lines;
         }
 
@@ -280,7 +289,7 @@ namespace CodeGenerator
             writer.WriteLine("\t\t\t{");
 
             PrintInvokableArguments(ctor_args, ctor_kw, ctor_param_types);
-            writer.WriteLine($"\t\t\t\tself = {current_static_class}.self.InvokeMethod(\"{class_name}\", args, pyDict);");
+            writer.WriteLine($"\t\t\t\tself = {fixed_namespace}.self.InvokeMethod(\"{class_name}\", args, pyDict);");
 
 
             writer.WriteLine("\t\t\t}");

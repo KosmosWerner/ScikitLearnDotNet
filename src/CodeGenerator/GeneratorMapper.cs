@@ -10,26 +10,38 @@ namespace CodeGenerator;
 
 internal class GeneratorMapper
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="default_param">True,False,None,"Ohter"</param>
-    /// <returns></returns>
-    public static string FixDefaultValue(string default_param)
+    private static readonly Dictionary<string, string> nativeTypes = new()
     {
-        string result = default_param switch
-        {
-            "True" => "true",
-            "False" => "false",
-            "None" => "null",
-            _ => Regex.IsMatch(default_param, @"^\d+\.\d+$")
-                ? $"{default_param}f"
-                : default_param.Replace("'", "\"")
-        };
+        ["True"] = "true",
+        ["False"] = "false",
+        ["np.float64(2.220446049250313e-16)"] = "float.Epsilon",
+        ["None"] = "null",
+        ["inf"] = "float.PositiveInfinity",
+    };
 
-        Debug.WriteLine($"CONVERT {default_param} -> {result}");
-        return result;
+    public static string PythonDefaultValueToCSharp(string default_param)
+    {
+        if (nativeTypes.TryGetValue(default_param, out string? nativeType))
+            return nativeType;
+
+        if (Regex.IsMatch(default_param, @"^[+-]?\d+$", RegexOptions.Compiled))
+            return default_param;
+
+        if (Regex.IsMatch(default_param, @"^[+-]?\d+(\.\d+)?(e[+-]?\d+)?$", RegexOptions.IgnoreCase | RegexOptions.Compiled))
+            return $"{default_param}f";
+
+        if (default_param.StartsWith("'") && default_param.EndsWith("'") && default_param.Length > 1)
+            return default_param.Replace('\'', '"');
+
+        if (default_param.StartsWith("&lt;") && default_param.EndsWith("&gt;"))
+            return "null";
+        //throw new ArgumentException($"The value \"{default_param}\" contains text wrapped in &lt; and &gt;");
+
+        throw new ArgumentException($"The value \"{default_param}\" does not match contents of the expected formats");
     }
+
+
+
 
     private static string[] FixReturnType(string raw_type)
     {
@@ -95,7 +107,10 @@ internal class GeneratorMapper
 
         //Debug.WriteLine(string.Join(" ||||||| ", parts));
 
+        void dsa(int d = 1, int a = 2)
+        {
 
+        }
 
         if (raw_type.Contains("Ignored", StringComparison.OrdinalIgnoreCase)) return "PyObject?";
 
@@ -210,40 +225,58 @@ internal class GeneratorMapper
     public static class MethodParams
     {
         public static void AssignDefaultValues(
-            string? param_operator,
-            string? param_name,
-            string? param_default,
+            string? param_text,
             ref bool is_arg,
             Dictionary<string, string> method_args,
             Dictionary<string, string> method_kw)
         {
-            if (param_operator == "*")
+            ArgumentNullException.ThrowIfNull(param_text);
+
+            if (param_text == "*")
             {
                 is_arg = false;
                 return;
             }
 
-            if (param_name == null) return;
-
-            if (param_operator == "**")
+            if (param_text.StartsWith("**"))
             {
-                method_kw["@params"] = FixDefaultValue("None"); ;
+                method_kw["@params"] = PythonDefaultValueToCSharp("None");
+                is_arg = false;
                 return;
             }
 
-            var current = is_arg && param_default == null ? method_args : method_kw;
+            string[] parameters = param_text.Split('=');
+            if (parameters.Length == 1)
+            {
+                string param_name = parameters[0].Trim();
 
-            current[param_name] = param_default != null ? FixDefaultValue(param_default) : string.Empty;
+                method_args[param_name] = string.Empty;
+            }
+            else if (parameters.Length == 2)
+            {
+                string param_name = parameters[0].Split(':')[0].Trim();
+                string param_value = parameters[1].Trim();
+
+                method_kw[param_name] = PythonDefaultValueToCSharp(param_value);
+
+                // ????
+                // if (is_arg) method_args[param_name] = PythonDefaultValueToCSharp(param_value);
+                // else method_kw[param_name] = PythonDefaultValueToCSharp(param_value);
+            }
+            else
+            {
+                throw new ArgumentException($"Invalid format in parameter '{param_text}': expected at most one equal sign ('='). Number of tokens found: {parameters.Length}");
+            }
         }
 
         public static void AssignTypes(
             string? param_name,
-            string? param_type,
+            string? param_content,
             Dictionary<string, string> param_args,
             Dictionary<string, string> param_kw,
             Dictionary<string, string> param_types)
         {
-            if (param_name == null || param_type == null) return;
+            if (param_name == null || param_content == null) return;
 
             if (param_name.StartsWith("**"))
             {
@@ -251,19 +284,21 @@ internal class GeneratorMapper
                 return;
             }
 
-            string default_param = string.Empty;
+            if (param_content.Contains("Ignored"))
+            {
+                param_args.Remove(param_name);
+                param_kw.Remove(param_name);
+                return;
+            }
 
             if (param_args.TryGetValue(param_name, out string? value_arg))
             {
-                default_param = value_arg;
+                param_types[param_name] = FixParamType(param_content, value_arg);
             }
             else if (param_kw.TryGetValue(param_name, out string? value_kw))
             {
-                default_param = value_kw;
+                param_types[param_name] = FixParamType(param_content, value_kw);
             }
-            else return;
-
-            param_types[param_name] = FixParamType(param_type, default_param);
         }
     }
 }

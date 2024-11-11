@@ -1,5 +1,6 @@
 ﻿using CodeGenerator.Utils;
 using HtmlAgilityPack;
+using System.Reflection.Metadata.Ecma335;
 
 namespace CodeGenerator;
 
@@ -80,14 +81,8 @@ internal static partial class Generator
                     // Exists constructor params: default value
                     foreach (var _param in _ctor_params)
                     {
-                        var param_operator = _param.SelectSingleNode(".//*[contains(@class, 'o')]")?.InnerText;
-                        var param_name = _param.SelectSingleNode(".//*[contains(@class, 'n')]")?.InnerText;
-                        var param_default = _param.SelectSingleNode(".//*[contains(@class, 'default_value')]")?.InnerText;
-
                         GeneratorMapper.MethodParams.AssignDefaultValues(
-                            param_operator,
-                            param_name,
-                            param_default,
+                            _param.InnerText,
                             ref ctor_is_arg,
                             ctor_args,
                             ctor_kw);
@@ -168,6 +163,7 @@ internal static partial class Generator
                         }
                         else
                         {
+                            continue; ////// CHECK THIS
                             throw new ArgumentException($"Class: field-even isn't Attributes: {_attributes_section[0].InnerText}\");");
                         }
                     }
@@ -196,6 +192,8 @@ internal static partial class Generator
                         var method_name = (_declaration.SelectSingleNode(".//*[contains(@class, 'sig-name descname')]")?.InnerText) ??
                             throw new ArgumentException("Documentation: Method without name");
 
+                        if (method_name.Contains("__")) continue; ///// Internal callable
+
                         //// Default Args ////
                         Dictionary<string, string> method_args = [];
                         Dictionary<string, string> method_kw = [];
@@ -208,14 +206,8 @@ internal static partial class Generator
                         {
                             foreach (var _param in _method_params)
                             {
-                                var param_operator = _param.SelectSingleNode(".//*[contains(@class, 'o')]")?.InnerText;
-                                var param_name = _param.SelectSingleNode(".//*[contains(@class, 'n')]")?.InnerText;
-                                var param_default = _param.SelectSingleNode(".//*[contains(@class, 'default_value')]")?.InnerText;
-
                                 GeneratorMapper.MethodParams.AssignDefaultValues(
-                                    param_operator,
-                                    param_name,
-                                    param_default,
+                                    _param.InnerText,
                                     ref method_is_arg,
                                     method_args,
                                     method_kw);
@@ -227,7 +219,10 @@ internal static partial class Generator
                         var _even_section = _method_container.SelectNodes(".//*[contains(@class, 'field-even')]");
 
                         if (_odd_section == null && _even_section == null)
-                            throw new ArgumentException("Method: no params, no return");
+                        {
+                            continue; // Not implemented exception
+                            // throw new ArgumentException("Method: no params, no return");
+                        }
 
                         HtmlNodeCollection? _params_section = null;
                         HtmlNodeCollection? _return_section = null;
@@ -282,6 +277,10 @@ internal static partial class Generator
                                 if (_return_info_type.InnerText.Contains("self"))
                                 {
                                     generatorWriter.PrintMethods(method_name, method_args, method_kw, method_types, class_name, self: true);
+                                }
+                                else if(_return_info_type.InnerText.Contains('_'))
+                                {
+                                    generatorWriter.PrintMethods(method_name, method_args, method_kw, method_types, GeneratorMapper.FixParamType(_return_info_type.InnerText));
                                 }
                                 else throw new ArgumentException("UNKNOW RETURN");
                             }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -9,23 +10,33 @@ namespace CodeGenerator;
 
 internal class GeneratorMapper
 {
-    public static string FixDefaultValue(string param_default)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="default_param">True,False,None,"Ohter"</param>
+    /// <returns></returns>
+    public static string FixDefaultValue(string default_param)
     {
-        string result = param_default switch
+        string result = default_param switch
         {
             "True" => "true",
             "False" => "false",
             "None" => "null",
-            _ => param_default.Replace("'", "\"")
+            _ => Regex.IsMatch(default_param, @"^\d+\.\d+$")
+                ? $"{default_param}f"
+                : default_param.Replace("'", "\"")
         };
 
-        if (Regex.IsMatch(result, @"^\d+\.\d+$")) result += "f";
-
+        Debug.WriteLine($"CONVERT {default_param} -> {result}");
         return result;
     }
 
     private static string[] FixReturnType(string raw_type)
     {
+
+
+
+
         bool nullable = raw_type.Contains("None", StringComparison.OrdinalIgnoreCase) ||
                         raw_type.Contains("Ignored", StringComparison.OrdinalIgnoreCase);
 
@@ -61,8 +72,31 @@ internal class GeneratorMapper
         return result.ToArray();
     }
 
-    public static string FixParamType(string raw_type, string? default_value = null)
+    public static string FixParamType(string raw_type, string default_value = "")
     {
+        bool is_arg = string.IsNullOrEmpty(default_value);
+
+        if (is_arg)
+        {
+
+        }
+        else
+        {
+
+        }
+
+        string clear_raw_type = Regex.Replace(raw_type, @"\(([^()]*)\)", m =>
+        {
+            return m.Value.Replace(",", ""); // Elimina las comas dentro de cada paréntesis
+        });
+
+        // Paso 2: Divide en base a comas o "or" fuera de los paréntesis
+        var parts = Regex.Split(clear_raw_type, @"\s*,\s*|\s+or\s+");
+
+        //Debug.WriteLine(string.Join(" ||||||| ", parts));
+
+
+
         if (raw_type.Contains("Ignored", StringComparison.OrdinalIgnoreCase)) return "PyObject?";
 
         bool nullable = raw_type.Contains("None", StringComparison.OrdinalIgnoreCase);
@@ -180,14 +214,9 @@ internal class GeneratorMapper
             string? param_name,
             string? param_default,
             ref bool is_arg,
-            Dictionary<string, string?> method_args,
-            Dictionary<string, string?> method_kw)
+            Dictionary<string, string> method_args,
+            Dictionary<string, string> method_kw)
         {
-            // a = 1    -> a = 1
-            // b = ''   -> b = ""
-            //   *
-            // **params -> params = null
-
             if (param_operator == "*")
             {
                 is_arg = false;
@@ -198,44 +227,43 @@ internal class GeneratorMapper
 
             if (param_operator == "**")
             {
-                method_kw["@params"] = null;
+                method_kw["@params"] = FixDefaultValue("None"); ;
                 return;
             }
 
-
             var current = is_arg && param_default == null ? method_args : method_kw;
 
-            if (param_default == null)
-            {
-                current[param_name] = null;
-            }
-            else
-            {
-                string fixed_default = FixDefaultValue(param_default);
-
-                current[param_name] = fixed_default;
-            }
+            current[param_name] = param_default != null ? FixDefaultValue(param_default) : string.Empty;
         }
 
         public static void AssignTypes(
             string? param_name,
             string? param_type,
-            Dictionary<string, string?> param_args,
-            Dictionary<string, string?> param_kw,
+            Dictionary<string, string> param_args,
+            Dictionary<string, string> param_kw,
             Dictionary<string, string> param_types)
         {
             if (param_name == null || param_type == null) return;
 
-            string? default_value = null;
-            if (param_args.TryGetValue(param_name, out string? value))
-                default_value = value;
-            else if (param_kw.TryGetValue(param_name, out string? value2))
-                default_value = value2;
-
             if (param_name.StartsWith("**"))
-                param_types["@params"] = FixParamType(param_type, default_value);
-            else
-                param_types[param_name] = FixParamType(param_type, default_value);
+            {
+                param_types["@params"] = "PyDict?";
+                return;
+            }
+
+            string default_param = string.Empty;
+
+            if (param_args.TryGetValue(param_name, out string? value_arg))
+            {
+                default_param = value_arg;
+            }
+            else if (param_kw.TryGetValue(param_name, out string? value_kw))
+            {
+                default_param = value_kw;
+            }
+            else return;
+
+            param_types[param_name] = FixParamType(param_type, default_param);
         }
     }
 }

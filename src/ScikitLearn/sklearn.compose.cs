@@ -248,20 +248,5 @@ public static partial class sklearn
 
 		}
 
-		public class make_column_selector : PythonObject
-		{
-			public make_column_selector(string? pattern = null, PyObject dtype_include = null, PyObject dtype_exclude = null)
-			{
-				PyTuple args = new PyTuple();
-				PyDict pyDict = new PyDict();
-				if (pattern != null)
-				{
-					pyDict["pattern"] = ToPython(pattern);
-				}
-				pyDict["dtype_include"] = ToPython(dtype_include);
-				pyDict["dtype_exclude"] = ToPython(dtype_exclude);
-				self = sklearn.compose.self.InvokeMethod("make_column_selector", args, pyDict);
-			}
-		}
 	}
 }

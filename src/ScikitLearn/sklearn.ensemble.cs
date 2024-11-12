@@ -331,7 +331,7 @@ public static partial class sklearn
 
 		public class BaggingClassifier : PythonObject
 		{
-			public BaggingClassifier(PyObject estimator = null, int n_estimators = 10, int max_samples = 1, int max_features = 1, bool bootstrap = true, bool bootstrap_features = false, bool oob_score = false, bool warm_start = false, int? n_jobs = null, int? random_state = null, int verbose = 0)
+			public BaggingClassifier(PyObject estimator = null, int n_estimators = 10, float max_samples = 1.0f, float max_features = 1.0f, bool bootstrap = true, bool bootstrap_features = false, bool oob_score = false, bool warm_start = false, int? n_jobs = null, int? random_state = null, int verbose = 0)
 			{
 				PyTuple args = new PyTuple();
 				PyDict pyDict = new PyDict();
@@ -490,7 +490,7 @@ public static partial class sklearn
 
 		public class BaggingRegressor : PythonObject
 		{
-			public BaggingRegressor(PyObject estimator = null, int n_estimators = 10, int max_samples = 1, int max_features = 1, bool bootstrap = true, bool bootstrap_features = false, bool oob_score = false, bool warm_start = false, int? n_jobs = null, int? random_state = null, int verbose = 0)
+			public BaggingRegressor(PyObject estimator = null, int n_estimators = 10, float max_samples = 1.0f, float max_features = 1.0f, bool bootstrap = true, bool bootstrap_features = false, bool oob_score = false, bool warm_start = false, int? n_jobs = null, int? random_state = null, int verbose = 0)
 			{
 				PyTuple args = new PyTuple();
 				PyDict pyDict = new PyDict();
@@ -810,7 +810,7 @@ public static partial class sklearn
 
 		public class ExtraTreesRegressor : PythonObject
 		{
-			public ExtraTreesRegressor(int n_estimators = 100, string criterion = "squared_error", int? max_depth = null, float min_samples_split = 2, float min_samples_leaf = 1, float min_weight_fraction_leaf = 0.0f, int? max_features = 1, int? max_leaf_nodes = null, float min_impurity_decrease = 0.0f, bool bootstrap = false, bool oob_score = false, int? n_jobs = null, int? random_state = null, int verbose = 0, bool warm_start = false, float ccp_alpha = 0.0f, int? max_samples = null, NDarray? monotonic_cst = null)
+			public ExtraTreesRegressor(int n_estimators = 100, string criterion = "squared_error", int? max_depth = null, float min_samples_split = 2, float min_samples_leaf = 1, float min_weight_fraction_leaf = 0.0f, float? max_features = 1.0f, int? max_leaf_nodes = null, float min_impurity_decrease = 0.0f, bool bootstrap = false, bool oob_score = false, int? n_jobs = null, int? random_state = null, int verbose = 0, bool warm_start = false, float ccp_alpha = 0.0f, int? max_samples = null, NDarray? monotonic_cst = null)
 			{
 				PyTuple args = new PyTuple();
 				PyDict pyDict = new PyDict();
@@ -1740,7 +1740,7 @@ public static partial class sklearn
 
 		public class IsolationForest : PythonObject
 		{
-			public IsolationForest(int n_estimators = 100, string max_samples = "auto", string contamination = "auto", int max_features = 1, bool bootstrap = false, int? n_jobs = null, int? random_state = null, int verbose = 0, bool warm_start = false)
+			public IsolationForest(int n_estimators = 100, string max_samples = "auto", string contamination = "auto", float max_features = 1.0f, bool bootstrap = false, int? n_jobs = null, int? random_state = null, int verbose = 0, bool warm_start = false)
 			{
 				PyTuple args = new PyTuple();
 				PyDict pyDict = new PyDict();
@@ -2058,7 +2058,7 @@ public static partial class sklearn
 
 		public class RandomForestRegressor : PythonObject
 		{
-			public RandomForestRegressor(int n_estimators = 100, string criterion = "squared_error", int? max_depth = null, float min_samples_split = 2, float min_samples_leaf = 1, float min_weight_fraction_leaf = 0.0f, int? max_features = 1, int? max_leaf_nodes = null, float min_impurity_decrease = 0.0f, bool bootstrap = true, bool oob_score = false, int? n_jobs = null, int? random_state = null, int verbose = 0, bool warm_start = false, float ccp_alpha = 0.0f, int? max_samples = null, NDarray? monotonic_cst = null)
+			public RandomForestRegressor(int n_estimators = 100, string criterion = "squared_error", int? max_depth = null, float min_samples_split = 2, float min_samples_leaf = 1, float min_weight_fraction_leaf = 0.0f, float? max_features = 1.0f, int? max_leaf_nodes = null, float min_impurity_decrease = 0.0f, bool bootstrap = true, bool oob_score = false, int? n_jobs = null, int? random_state = null, int verbose = 0, bool warm_start = false, float ccp_alpha = 0.0f, int? max_samples = null, NDarray? monotonic_cst = null)
 			{
 				PyTuple args = new PyTuple();
 				PyDict pyDict = new PyDict();

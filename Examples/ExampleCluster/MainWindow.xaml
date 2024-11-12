@@ -1,0 +1,102 @@
+﻿<Window x:Class="ExampleCluster.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ExampleCluster"
+        xmlns:Scottplot="clr-namespace:ScottPlot.WPF;assembly=ScottPlot.WPF"
+        mc:Ignorable="d"
+        Title="MainWindow"
+        Height="450"
+        Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="150" />
+        </Grid.ColumnDefinitions>
+
+        <Scottplot:WpfPlot x:Name="plotDbcan1"
+                           Grid.Row="0"
+                           Grid.Column="0" />
+
+        <Scottplot:WpfPlot x:Name="plotDbcan2"
+                           Grid.Row="1"
+                           Grid.Column="0" />
+
+        <Scottplot:WpfPlot x:Name="plotDbcan3"
+                           Grid.Row="2"
+                           Grid.Column="0" />
+
+        <Scottplot:WpfPlot x:Name="plotOptics1"
+                           Grid.Row="0"
+                           Grid.Column="1" />
+
+        <Scottplot:WpfPlot x:Name="plotOptics2"
+                           Grid.Row="1"
+                           Grid.Column="1" />
+
+        <Scottplot:WpfPlot x:Name="plotOptics3"
+                           Grid.Row="2"
+                           Grid.Column="1" />
+
+        <Scottplot:WpfPlot x:Name="plotMean1"
+                           Grid.Row="0"
+                           Grid.Column="2" />
+
+        <Scottplot:WpfPlot x:Name="plotMean2"
+                           Grid.Row="1"
+                           Grid.Column="2" />
+
+        <Scottplot:WpfPlot x:Name="plotMean3"
+                           Grid.Row="2"
+                           Grid.Column="2" />
+
+        <TextBlock Text="DBSCAN"
+                   HorizontalAlignment="Center"
+                   FontSize="30"
+                   Grid.Row="3"
+                   Grid.Column="0" />
+
+        <TextBlock Text="OPTICS"
+                   HorizontalAlignment="Center"
+                   FontSize="30"
+                   Grid.Row="3"
+                   Grid.Column="1" />
+
+        <TextBlock Text="MEAN SHIFT"
+                   HorizontalAlignment="Center"
+                   FontSize="30"
+                   Grid.Row="3"
+                   Grid.Column="2" />
+
+        <GroupBox Grid.Row="0"
+                  Grid.RowSpan="3"
+                  Grid.Column="3">
+            <StackPanel>
+                <Button Height="30"
+                        Click="ButtonGenerate_Click">Generate</Button>
+                <Button Height="30"
+                        Click="ButtonClasify_Click">Clasify</Button>
+                <TextBlock>EPS:</TextBlock>
+                <Slider x:Name="eps"
+                        Minimum="0.05"
+                        Maximum="4" />
+                <TextBlock>Min Features:</TextBlock>
+                <Slider x:Name="minFeatures"
+                        Minimum="1"
+                        Maximum="20"
+                        SmallChange="1"
+                        LargeChange="5"
+                        TickFrequency="1"/>
+            </StackPanel>
+        </GroupBox>
+    </Grid>
+</Window>

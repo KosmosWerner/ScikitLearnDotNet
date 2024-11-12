@@ -22,22 +22,25 @@ internal class GeneratorMapper
     public static string PythonDefaultValueToCSharp(string default_param)
     {
         if (nativeTypes.TryGetValue(default_param, out string? nativeType))
-            return nativeType;
+            return nativeType; // value
 
         if (Regex.IsMatch(default_param, @"^[+-]?\d+$", RegexOptions.Compiled))
-            return default_param;
+            return default_param; // int
 
         if (Regex.IsMatch(default_param, @"^[+-]?\d+(\.\d+)?(e[+-]?\d+)?$", RegexOptions.IgnoreCase | RegexOptions.Compiled))
-            return $"{default_param}f";
+            return $"{default_param}f"; // float
 
-        if (default_param.StartsWith("'") && default_param.EndsWith("'") && default_param.Length > 1)
-            return default_param.Replace('\'', '"');
+        if (default_param.StartsWith('\'') && default_param.EndsWith('\'') && default_param.Length > 1)
+            return default_param.Replace('\'', '"'); // string
+
+        if (default_param.StartsWith('(') && default_param.EndsWith(')') && default_param.Contains(','))
+            return default_param.Replace('\'', '"'); // tuple
 
         if (default_param.StartsWith("&lt;") && default_param.EndsWith("&gt;"))
             return "null";
         //throw new ArgumentException($"The value \"{default_param}\" contains text wrapped in &lt; and &gt;");
 
-        throw new ArgumentException($"The value \"{default_param}\" does not match contents of the expected formats");
+        throw new ArgumentException($"The value \"{default_param}\" does not match contents of the expected formats (bool,float, etc)");
     }
 
 
@@ -107,11 +110,6 @@ internal class GeneratorMapper
 
         //Debug.WriteLine(string.Join(" ||||||| ", parts));
 
-        void dsa(int d = 1, int a = 2)
-        {
-
-        }
-
         if (raw_type.Contains("Ignored", StringComparison.OrdinalIgnoreCase)) return "PyObject?";
 
         bool nullable = raw_type.Contains("None", StringComparison.OrdinalIgnoreCase);
@@ -137,7 +135,7 @@ internal class GeneratorMapper
             { "shape", "NDarray" },
             { "sparce", "NDarray" },
             { "PyDict", "dict" },
-
+            { "Bunch", "dict" },
         };
 
         var result = typePatterns
@@ -245,7 +243,12 @@ internal class GeneratorMapper
                 return;
             }
 
-            string[] parameters = param_text.Split('=');
+            //string[] parameters = param_text.Split('=');
+            // a = 'b' -> 2
+            // a = 'b=c' -> 2
+            // a = 'b' = c -> 3
+            string[] parameters = param_text.Split('=', 2);
+
             if (parameters.Length == 1)
             {
                 string param_name = parameters[0].Trim();
@@ -254,6 +257,7 @@ internal class GeneratorMapper
             }
             else if (parameters.Length == 2)
             {
+                //for this case ->  sample_weight: bool | None | str = '$UNCHANGED$'
                 string param_name = parameters[0].Split(':')[0].Trim();
                 string param_value = parameters[1].Trim();
 

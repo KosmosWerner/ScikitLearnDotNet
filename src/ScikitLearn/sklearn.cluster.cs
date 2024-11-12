@@ -1366,7 +1366,7 @@ public static partial class sklearn
 
 		public class OPTICS : PythonObject
 		{
-			public OPTICS(float min_samples = 5, float max_eps = float.PositiveInfinity, string metric = "minkowski", float p = 2, PyObject metric_params = null, string cluster_method = "xi", float? eps = null, float xi = 0.05f, bool predecessor_correction = true, int? min_cluster_size = null, string algorithm = "auto", int leaf_size = 30, int? memory = null, int? n_jobs = null)
+			public OPTICS(int min_samples = 5, float max_eps = float.PositiveInfinity, string metric = "minkowski", float p = 2, PyObject metric_params = null, string cluster_method = "xi", float? eps = null, float xi = 0.05f, bool predecessor_correction = true, int? min_cluster_size = null, string algorithm = "auto", int leaf_size = 30, int? memory = null, int? n_jobs = null)
 			{
 				PyTuple args = new PyTuple();
 				PyDict pyDict = new PyDict();

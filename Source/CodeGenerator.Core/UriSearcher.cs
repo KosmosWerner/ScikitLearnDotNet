@@ -1,14 +1,9 @@
 ﻿using HtmlAgilityPack;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
-namespace CodeGenerator;
+namespace CodeGenerator.Core;
 
-internal static class UriSearcher
+public static class UriSearcher
 {
     private static readonly string URL_LIST = "current nav bd-sidenav";
     private static readonly string URL_LIST_ITEM = "reference internal";
@@ -39,7 +34,7 @@ internal static class UriSearcher
                 if (href == "#") uris.Add(baseUri);
                 else uris.Add(new Uri(baseUri, href));
             }
-            
+
             return Search(uris);
         }
         catch (Exception e)

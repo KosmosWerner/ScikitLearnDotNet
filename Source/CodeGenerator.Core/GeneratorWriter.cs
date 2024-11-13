@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using CodeGenerator.Utils;
+using CodeGenerator.Core.Utils;
 
-namespace CodeGenerator
+namespace CodeGenerator.Core
 {
     internal class GeneratorWriter
     {
@@ -26,7 +26,7 @@ namespace CodeGenerator
         {
             this.writer = writer;
             this.current_namespace = current_namespace;
-            this.current_static_class = current_namespace.Split(".")[^1];
+            current_static_class = current_namespace.Split(".")[^1];
             if (names.Contains(current_static_class)) current_static_class = "@" + current_static_class;
             if (current_namespace.Split(".")[^1] != current_static_class)
             {

@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CodeGenerator.Nodes
+namespace CodeGenerator.Core.Nodes
 {
     internal interface INode
     {
-        
+
     }
 }

@@ -1,11 +1,11 @@
-﻿using CodeGenerator.Utils;
-using HtmlAgilityPack;
+﻿using HtmlAgilityPack;
+using CodeGenerator.Core.Utils;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 
-namespace CodeGenerator;
+namespace CodeGenerator.Core;
 
-internal static partial class Generator
+public static class Generator
 {
     public static async Task GenerateFrom(Dictionary<string, List<Uri>> source)
     {

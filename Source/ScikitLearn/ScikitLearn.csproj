@@ -12,7 +12,7 @@
 		<RepositoryUrl>https://github.com/KosmosWerner/ScikitLearn.Net</RepositoryUrl>
 		<PackageProjectUrl>https://github.com/KosmosWerner/ScikitLearn.Net</PackageProjectUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<PackageReadmeFile>readme.md</PackageReadmeFile>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 
 		<PackageTags>Machine Learning, Sklearn, ScikitLearn, AI, Clustering</PackageTags>
 		<Version>0.0.1</Version>

@@ -1,4 +1,4 @@
-﻿namespace CodeGenerator.Utils;
+﻿namespace CodeGenerator.Core.Utils;
 
 public class ConsoleWriter : IWriter
 {

@@ -17,8 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\CodeGenerator\CodeGenerator.csproj" />
-    <ProjectReference Include="..\..\src\CodeGenerator\CodeGenerator.csproj" />
+    <ProjectReference Include="..\..\Source\CodeGenerator.Core\CodeGenerator.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

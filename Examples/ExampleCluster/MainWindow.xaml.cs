@@ -73,7 +73,7 @@ namespace ExampleCluster
                 coordinates1y[i] = -10 + random.NextDouble() * 20;
             }
 
-            DrawRandomPoints(coordinates1x, coordinates1y, plotDbcan1, plotOptics1, plotMean1);
+            PlotRandomPoints(coordinates1x, coordinates1y, plotDbcan1, plotOptics1, plotMean1);
         }
 
         public void GenerateRandomGroups()
@@ -95,7 +95,7 @@ namespace ExampleCluster
                 }
             }
 
-            DrawRandomPoints(coordinates2x, coordinates2y, plotDbcan2, plotOptics2, plotMean2);
+            PlotRandomPoints(coordinates2x, coordinates2y, plotDbcan2, plotOptics2, plotMean2);
         }
 
         public void GenerateRanomCircles()
@@ -117,7 +117,7 @@ namespace ExampleCluster
                 coordinates3y[i] = (10 + random.NextDouble() * 2) * Math.Sin(angle);
             }
 
-            DrawRandomPoints(coordinates3x, coordinates3y, plotDbcan3, plotOptics3, plotMean3);
+            PlotRandomPoints(coordinates3x, coordinates3y, plotDbcan3, plotOptics3, plotMean3);
         }
 
         private void ButtonGenerate_Click(object sender, RoutedEventArgs e)
@@ -127,13 +127,15 @@ namespace ExampleCluster
             GenerateRanomCircles();
         }
 
-        private void ClasifyBDSCAN(double[] _xs, double[] _ys, WpfPlot plot)
+        private void ClassifyBDSCAN(double[] _xs, double[] _ys, WpfPlot plot)
         {
+            if (!(boolDBSCAN.IsChecked ?? false)) return;
+
             var xs = np.array(_xs);
             var ys = np.array(_ys);
 
             NDarray X = np.vstack(xs, ys).T;
-            var model = new sklearn.cluster.DBSCAN(eps: (float)eps.Value, min_samples: 5);
+            var model = new sklearn.cluster.DBSCAN(eps: (float)slEps.Value, min_samples: (int)slMinSamples.Value);
 
             NDarray labels = model.fit_predict(X);
 
@@ -149,11 +151,9 @@ namespace ExampleCluster
 
                 for (int j = 0; j < tags.Length; j++)
                 {
-                    if (tags[j] == i)
-                    {
-                        lx.Add(_xs[j]);
-                        ly.Add(_ys[j]);
-                    }
+                    if (tags[j] != i) continue;
+                    lx.Add(_xs[j]);
+                    ly.Add(_ys[j]);
                 }
 
                 plot.Plot.Add.ScatterPoints(lx, ly, color: (i == -1) ? ScottPlot.Colors.Gray : ScottPlot.Color.RandomHue());
@@ -162,20 +162,21 @@ namespace ExampleCluster
             plot.Refresh();
         }
 
-        private void ClasifyOPTICS(double[] _xs, double[] _ys, WpfPlot plot)
+        private void ClassifyOPTICS(double[] _xs, double[] _ys, WpfPlot plot)
         {
+            if (!(boolOPTICS.IsChecked ?? false)) return;
+
             var xs = np.array(_xs);
             var ys = np.array(_ys);
 
             NDarray X = np.vstack(xs, ys).T;
 
-            var model = new sklearn.cluster.OPTICS(min_samples: 2).fit(X);
+            var model = new sklearn.cluster.OPTICS(min_samples: (int)slMin_Samples2.Value).fit(X);
 
             NDarray labels = model.labels_;
             var tags = labels.GetData<long>();
             var min = tags.Min();
             var max = tags.Max();
-
 
             plot.Plot.Clear();
             for (var i = min; i <= max; i++)
@@ -185,13 +186,10 @@ namespace ExampleCluster
 
                 for (int j = 0; j < tags.Length; j++)
                 {
-                    if (tags[j] == i)
-                    {
-                        lx.Add(_xs[j]);
-                        ly.Add(_ys[j]);
-                    }
+                    if (tags[j] != i) continue;
+                    lx.Add(_xs[j]);
+                    ly.Add(_ys[j]);
                 }
-
 
                 plot.Plot.Add.ScatterPoints(lx, ly, color: (i == -1) ? ScottPlot.Colors.Gray : ScottPlot.Color.RandomHue());
             }
@@ -199,20 +197,21 @@ namespace ExampleCluster
             plot.Refresh();
         }
 
-        private void ClasifyMeanShift(double[] _xs, double[] _ys, WpfPlot plot)
+        private void ClassifyMeanShift(double[] _xs, double[] _ys, WpfPlot plot)
         {
+            if (!(boolMeanShift.IsChecked ?? false)) return;
+
             var xs = np.array(_xs);
             var ys = np.array(_ys);
 
             NDarray X = np.vstack(xs, ys).T;
 
-            var model = new sklearn.cluster.MeanShift(bandwidth: 2).fit(X);
+            var model = new sklearn.cluster.MeanShift(bandwidth: (float)slBandWidth.Value).fit(X);
 
             NDarray labels = model.labels_;
             var tags = labels.GetData<long>();
             var min = tags.Min();
             var max = tags.Max();
-
 
             plot.Plot.Clear();
             for (var i = min; i <= max; i++)
@@ -222,13 +221,10 @@ namespace ExampleCluster
 
                 for (int j = 0; j < tags.Length; j++)
                 {
-                    if (tags[j] == i)
-                    {
-                        lx.Add(_xs[j]);
-                        ly.Add(_ys[j]);
-                    }
+                    if (tags[j] != i) continue;
+                    lx.Add(_xs[j]);
+                    ly.Add(_ys[j]);
                 }
-
 
                 plot.Plot.Add.ScatterPoints(lx, ly, color: (i == -1) ? ScottPlot.Colors.Gray : ScottPlot.Color.RandomHue());
             }
@@ -236,22 +232,22 @@ namespace ExampleCluster
             plot.Refresh();
         }
 
-        private void ButtonClasify_Click(object sender, RoutedEventArgs e)
+        private void ButtonClassify_Click(object sender, RoutedEventArgs e)
         {
-            ClasifyBDSCAN(coordinates1x, coordinates1y, plotDbcan1);
-            ClasifyBDSCAN(coordinates2x, coordinates2y, plotDbcan2);
-            ClasifyBDSCAN(coordinates3x, coordinates3y, plotDbcan3);
+            ClassifyBDSCAN(coordinates1x, coordinates1y, plotDbcan1);
+            ClassifyBDSCAN(coordinates2x, coordinates2y, plotDbcan2);
+            ClassifyBDSCAN(coordinates3x, coordinates3y, plotDbcan3);
 
-            ClasifyOPTICS(coordinates1x, coordinates1y, plotOptics1);
-            ClasifyOPTICS(coordinates2x, coordinates2y, plotOptics2);
-            ClasifyOPTICS(coordinates3x, coordinates3y, plotOptics3);
+            ClassifyOPTICS(coordinates1x, coordinates1y, plotOptics1);
+            ClassifyOPTICS(coordinates2x, coordinates2y, plotOptics2);
+            ClassifyOPTICS(coordinates3x, coordinates3y, plotOptics3);
 
-            ClasifyMeanShift(coordinates1x, coordinates1y, plotMean1);
-            ClasifyMeanShift(coordinates2x, coordinates2y, plotMean2);
-            ClasifyMeanShift(coordinates3x, coordinates3y, plotMean3);
+            ClassifyMeanShift(coordinates1x, coordinates1y, plotMean1);
+            ClassifyMeanShift(coordinates2x, coordinates2y, plotMean2);
+            ClassifyMeanShift(coordinates3x, coordinates3y, plotMean3);
         }
 
-        private void DrawRandomPoints(double[] coordinatesx, double[] coordinatesy, WpfPlot plotDbcan, WpfPlot plotOptics, WpfPlot plotMean, bool clear = true)
+        private void PlotRandomPoints(double[] coordinatesx, double[] coordinatesy, WpfPlot plotDbcan, WpfPlot plotOptics, WpfPlot plotMean, bool clear = true)
         {
             if (clear)
             {

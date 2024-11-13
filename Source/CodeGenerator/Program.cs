@@ -4,7 +4,7 @@ internal class Program
 {
     public static async Task Main(string[] args)
     {
-        var urls = await UriSearcher.Search("https://scikit-learn.org/stable/api/sklearn.html");
+        //var urls = await UriSearcher.Search("https://scikit-learn.org/stable/api/sklearn.html");
 
         //List<Uri> urls =
         //[
@@ -16,9 +16,12 @@ internal class Program
         //    new ("https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html"),
         //];
 
-        await Generator.GenerateFrom(urls);
+        Console.WriteLine(typeof((float, int)).);
+        Type t = typeof((float, int));
 
-        Console.WriteLine("OK");
+        //await Generator.GenerateFrom(urls);
+
+        // Console.WriteLine("OK");
         //await Generator.GenerateFromNamespace("sklearn.cluster", urls);
     }
 }

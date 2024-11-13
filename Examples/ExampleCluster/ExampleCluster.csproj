@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\ScikitLearn\ScikitLearn.csproj" />
+    <ProjectReference Include="..\..\Source\ScikitLearn\ScikitLearn.csproj" />
   </ItemGroup>
 
 </Project>

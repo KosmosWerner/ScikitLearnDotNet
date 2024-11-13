@@ -91,7 +91,7 @@ This project originated from the need to use classification algorithms within th
 
 https://github.com/user-attachments/assets/196507a2-50a7-4c69-b459-9eb8d5fd7d1b
 
-[Full code here](https://github.com/KosmosWerner/ScikitLearn.Net/tree/main/Examples/ExampleCluster)
+[Full code here](https://github.com/KosmosWerner/ScikitLearn.Net/tree/main/Examples/ClusterExample)
 
 ## Final Notes
 This project is just starting, so some parts may still lack full implementation or proper error handling. However, I’ll be adding tests to verify return types and improve typing accuracy.

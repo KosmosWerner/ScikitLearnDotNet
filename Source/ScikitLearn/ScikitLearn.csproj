@@ -12,7 +12,9 @@
 		<Copyright>2024 - Kosmos Werner Heisenberg</Copyright>
 		<RepositoryUrl>https://github.com/KosmosWerner/ScikitLearn.Net</RepositoryUrl>
 		<PackageProjectUrl>https://github.com/KosmosWerner/ScikitLearn.Net</PackageProjectUrl>
-		<PackageLicenseUrl>https://github.com/KosmosWerner/ScikitLearn.Net/blob/main/LICENSE</PackageLicenseUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageReadmeFile>readme.md</PackageReadmeFile>
+
 		<PackageTags>Machine Learning, Sklearn, ScikitLearn, AI, Clustering</PackageTags>
 		<Version>0.0.1</Version>
 		<AssemblyVersion>0.0.1</AssemblyVersion>
@@ -26,3 +28,4 @@
 	</ItemGroup>
 
 </Project>
+

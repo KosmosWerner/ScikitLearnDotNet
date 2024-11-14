@@ -1,7 +1,7 @@
-# Sklearn.NET
+﻿# Sklearn.NET
 ### (Work In Progress)
 
-A C# binding for Scikit-Learn, focused on bringing Machine Learning to the C# environment. This library provides easy access to machine learning models, results, parameters and datasets.
+A C# binding for Scikit-Learn, focused on bringing Machine lLarning to the C# environment. This library provides easy access to machine learning models, results, parameters and datasets.
 
 Powered by [Numpy.Bare](https://github.com/SciSharp/Numpy.NET) and generated based on [Scikit-Learn’s documentation](https://scikit-learn.org/stable/index.html), implementing most of the classes and methods.
 

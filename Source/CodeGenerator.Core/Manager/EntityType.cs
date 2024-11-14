@@ -4,10 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CodeGenerator.Core.Nodes
+namespace CodeGenerator.Core.Manager
 {
-    internal interface INode
+    public enum EntityType
     {
-
+        None,
+        Class,
+        Method,
+        Exception
     }
 }

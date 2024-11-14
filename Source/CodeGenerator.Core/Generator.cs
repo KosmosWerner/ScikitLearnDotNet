@@ -41,27 +41,10 @@ public static class Generator
                     // sklearn.experimental
                     // https://scikit-learn.org/stable/modules/generated/sklearn.experimental.enable_halving_search_cv.html
                     // https://scikit-learn.org/stable/modules/generated/sklearn.experimental.enable_iterative_imputer.html
-                    continue;
+                    return;
                 }
 
-                Match declarationMatch = Regex.Match(declaration, @"(\w+\s+)?([\w\.]+)(\((.*)\))?");
-                string identifier = declarationMatch.Groups[1].Value;
-                string name = declarationMatch.Groups[2].Value.Split('.')[^1];
-                string rawParameters = declarationMatch.Groups[3].Value;
-
-                string expectedValue = string.Empty;
-
-                if (identifier.Contains("exception")) expectedValue = "exception";
-                else
-                {
-                    if (identifier.Contains("class"))
-                    {
-                        if (page.ReturnsBox != null) expectedValue = "method"; 
-                        else expectedValue = "class";
-
-                    }
-                    else expectedValue = "method";
-                }
+                EntityType expectedValue = Classifier.ClassifyEntity(page);
             }
             catch (HttpRequestException e)
             {

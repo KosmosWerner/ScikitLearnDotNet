@@ -2,6 +2,7 @@
 using CodeGenerator.Core.Utils;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using CodeGenerator.Core.Manager;
 
 namespace CodeGenerator.Core;
 
@@ -29,20 +30,13 @@ public static class Generator
 
             try
             {
-                #region PreparePageContent
-
                 string pageContent = await client.GetStringAsync(url);
 
-                var htmlDoc = new HtmlDocument();
-                htmlDoc.LoadHtml(pageContent);
+                EntityContainer page = new(pageContent);
+                ArgumentNullException.ThrowIfNull(page.ContentNode);
 
-                var nodeContent = htmlDoc.DocumentNode.SelectSingleNode("//*[contains(@class, 'bd-article')]");
-                ArgumentNullException.ThrowIfNull(nodeContent);
-
-                #endregion
-
-                var nodeDeclaration = nodeContent.SelectSingleNode(".//*[contains(@class, 'sig sig-object py')]");
-                if (nodeDeclaration == null)
+                var declaration = page.Declaration;
+                if (declaration == null)
                 {
                     // sklearn.experimental
                     // https://scikit-learn.org/stable/modules/generated/sklearn.experimental.enable_halving_search_cv.html
@@ -50,52 +44,23 @@ public static class Generator
                     continue;
                 }
 
-                Match declarationMatch = Regex.Match(nodeDeclaration.InnerText, @"(\w+\s+)?([\w\.]+)(\((.*)\))?");
+                Match declarationMatch = Regex.Match(declaration, @"(\w+\s+)?([\w\.]+)(\((.*)\))?");
+                string identifier = declarationMatch.Groups[1].Value;
+                string name = declarationMatch.Groups[2].Value.Split('.')[^1];
+                string rawParameters = declarationMatch.Groups[3].Value;
 
-                Trace.WriteLine(nodeDeclaration.InnerText);
-                Trace.WriteLine(declarationMatch.Groups[1].Success);
-                Trace.WriteLine(declarationMatch.Groups[2].Value);
-                Trace.WriteLine(declarationMatch.Groups[3].Value);
-                if (declarationMatch.Groups[1].Value.Contains("exception"))
-                {
-                    Trace.WriteLine("EXCEPTION");
-                }
-                else if (char.IsLower(declarationMatch.Groups[2].Value.Split('.')[^1][0]))
-                {
-                    Trace.WriteLine("METHOD");
-                }
-                else if (char.IsUpper(declarationMatch.Groups[2].Value.Split('.')[^1][0]))
-                {
-                    Trace.WriteLine("CLASS");
-                }
+                string expectedValue = string.Empty;
+
+                if (identifier.Contains("exception")) expectedValue = "exception";
                 else
                 {
-                    Trace.WriteLine("UNKNOWWWWWW");
-                }
-
-
-                var nodeIdentifier = nodeContent.SelectSingleNode(".//*[contains(@class, 'property')]");
-                if (nodeIdentifier == null)
-                {
-                    GenerateMethod(generatorWriter, nodeContent, nodeDeclaration);
-                }
-                else
-                {
-                    // check false positive
-                    var nodeParamsAndAttributes = nodeContent.SelectSingleNode(".//*[contains(@class, 'field-list') and not(ancestor::*/ancestor::*[contains(@class, 'py method')])]");
-                    var _attributes_section = nodeParamsAndAttributes?.SelectNodes(".//*[contains(@class, 'field-even')]");
-
-
-                    if (_attributes_section?[0]?.InnerText?.Contains("Return") ?? false) // Unusual, but exists
+                    if (identifier.Contains("class"))
                     {
-                        // https://scikit-learn.org/stable/modules/generated/sklearn.compose.make_column_selector.html
-                        // https://scikit-learn.org/stable/modules/generated/sklearn.compose.make_column_transformer.html
-                        GenerateMethod(generatorWriter, nodeContent, nodeDeclaration);
+                        if (page.ReturnsBox != null) expectedValue = "method"; 
+                        else expectedValue = "class";
+
                     }
-                    else
-                    {
-                        GenerateClass(generatorWriter, nodeContent, nodeDeclaration);
-                    }
+                    else expectedValue = "method";
                 }
             }
             catch (HttpRequestException e)
@@ -160,7 +125,7 @@ public static class Generator
                 // Check Header
                 if (nodeTypesSection[0].InnerText.Contains("Parameter"))
                 {
-                    // Iterate Content
+                    // Iterate ContentNode
                     var _param_types = nodeTypesSection[1].SelectNodes(".//dt");
                     if (_param_types != null)
                     {
@@ -200,7 +165,7 @@ public static class Generator
                 // Check Header
                 if (_attributes_section[0].InnerText.Contains("Attribute"))
                 {
-                    // Iterate Content
+                    // Iterate ContentNode
                     var _attribute = _attributes_section[1].SelectNodes(".//dt");
                     if (_attribute != null)
                     {

@@ -10,7 +10,8 @@ internal class Program
         string destinationPath = Path.GetFullPath(Path.Combine(currentPath, "..", "..", "..", "..", "ScikitLearn"));
 
         var urls = await UriSearcher.Search("https://scikit-learn.org/stable/api/sklearn.html");
-        await Generator.CreatePreGenerated(urls);
+        await Generator.CreatePreGenerated(urls, destinationPath);
 
+        Generator.CreateGenerated(destinationPath);
     }
 }

@@ -8,11 +8,11 @@ using System.Text.RegularExpressions;
 
 namespace CodeGeneratorTest
 {
-    public class TestFromURL
+    public class TestCodePreGeneration
     {
         private readonly Lazy<Task<Dictionary<string, List<Uri>>>> _lazyUrls;
 
-        public TestFromURL()
+        public TestCodePreGeneration()
         {
             _lazyUrls = new(() => UriSearcher.Search("https://scikit-learn.org/stable/api/sklearn.html"));
         }
@@ -39,7 +39,7 @@ namespace CodeGeneratorTest
                     try
                     {
                         string pageContent = await client.GetStringAsync(url);
-                        NewMethodVsOldMethod(pageContent);
+                        AnalyzePageContent(pageContent);
 
                     }
                     catch (HttpRequestException e)
@@ -50,7 +50,7 @@ namespace CodeGeneratorTest
             }
         }
 
-        private static void NewMethodVsOldMethod(string pageContent)
+        private static void AnalyzePageContent(string pageContent)
         {
             HtmlContainer page = new(pageContent);
             ArgumentNullException.ThrowIfNull(page.ContentNode);
@@ -65,13 +65,13 @@ namespace CodeGeneratorTest
             }
 
             #region NewMethod
-            EntityType expectedValue = Classifier.ClassifyHtml(page);
+            EntityType expectedValue = Associator.GetEntityType(page);
             #endregion
 
             #region OldMethod
 
             EntityType obtainedValue = EntityType.None;
-            var (identifier, _, _) = RegexAnalyzer.Declaration(declaration);
+            var (identifier, _, _) = RegexAnalyzer.FromDeclaration(declaration);
 
             var nodeIdentifier = page.ContentNode.SelectSingleNode(".//*[contains(@class, 'property')]");
             if (nodeIdentifier == null)

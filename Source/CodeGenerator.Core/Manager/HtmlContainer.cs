@@ -2,7 +2,7 @@
 
 namespace CodeGenerator.Core.Manager
 {
-    public class EntityContainer
+    public class HtmlContainer
     {
         public HtmlNode? ContentNode { get; }
         public string? Declaration { get; }
@@ -12,7 +12,7 @@ namespace CodeGenerator.Core.Manager
         public HtmlNodeCollection? MethodsBoxes { get; }
 
 
-        public EntityContainer(string pageContent)
+        public HtmlContainer(string pageContent)
         {
             var document = new HtmlDocument();
             document.LoadHtml(pageContent);
@@ -47,7 +47,7 @@ namespace CodeGenerator.Core.Manager
             MethodsBoxes = ContentNode?.SelectNodes(".//*[contains(@class, 'py method')]");
         }
 
-        public EntityContainer(HtmlNode content)
+        public HtmlContainer(HtmlNode content)
         {
             ContentNode = content;
 

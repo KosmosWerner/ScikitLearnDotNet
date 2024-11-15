@@ -10,7 +10,7 @@ namespace CodeGenerator.Core.Manager
 {
     public static class Classifier
     {
-        public static EntityType ClassifyEntity(EntityContainer entity)
+        public static EntityType ClassifyHtml(HtmlContainer entity)
         {
             if (entity.Declaration == null) return EntityType.None;
 

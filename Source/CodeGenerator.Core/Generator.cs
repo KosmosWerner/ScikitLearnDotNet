@@ -3,11 +3,50 @@ using CodeGenerator.Core.Utils;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using CodeGenerator.Core.Manager;
+using System.Text.Json;
 
 namespace CodeGenerator.Core;
 
 public static class Generator
 {
+    public static async Task CreatePreGenerated(Dictionary<string, List<Uri>> source, string directoryPath = ".")
+    {
+        JsonSerializerOptions options = new() { WriteIndented = true };
+
+        foreach (var (current_namespace, urls) in source)
+        {
+            List<DummyContainer> dummies = [];
+            foreach (var url in urls)
+            {
+                using HttpClient client = new();
+
+                try
+                {
+                    string pageContent = await client.GetStringAsync(url);
+                    HtmlContainer htmlContainer = new(pageContent);
+                    ArgumentNullException.ThrowIfNull(htmlContainer.ContentNode);
+
+                    var declaration = htmlContainer.Declaration;
+                    if (declaration == null) continue;
+
+                    dummies.Add(new DummyContainer(htmlContainer));
+                }
+                catch (HttpRequestException e)
+                {
+                    Console.WriteLine($"Error: {e.Message}");
+                }
+            }
+
+            string jsonString = JsonSerializer.Serialize(dummies, options);
+
+            var finalDirectory = Path.Combine(Path.GetFullPath(directoryPath), "PreGenerated");
+            string filePath = Path.Combine(finalDirectory, $"{current_namespace}.json");
+
+            Directory.CreateDirectory(finalDirectory);
+            File.WriteAllText(filePath, jsonString);
+        }
+    }
+
     public static async Task GenerateFrom(Dictionary<string, List<Uri>> source)
     {
         foreach (var (current_namespace, urls) in source)
@@ -32,7 +71,7 @@ public static class Generator
             {
                 string pageContent = await client.GetStringAsync(url);
 
-                EntityContainer page = new(pageContent);
+                HtmlContainer page = new(pageContent);
                 ArgumentNullException.ThrowIfNull(page.ContentNode);
 
                 var declaration = page.Declaration;
@@ -44,7 +83,7 @@ public static class Generator
                     return;
                 }
 
-                EntityType expectedValue = Classifier.ClassifyEntity(page);
+                EntityType expectedValue = Classifier.ClassifyHtml(page);
             }
             catch (HttpRequestException e)
             {

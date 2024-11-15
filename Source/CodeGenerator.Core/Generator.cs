@@ -4,48 +4,78 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using CodeGenerator.Core.Manager;
 using System.Text.Json;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace CodeGenerator.Core;
 
 public static class Generator
 {
-    public static async Task CreatePreGenerated(Dictionary<string, List<Uri>> source, string directoryPath = ".")
+    public static async Task CreatePreGenerated(Dictionary<string, List<Uri>> source, string baseDirectory = ".")
     {
-        JsonSerializerOptions options = new() { WriteIndented = true };
+        var serializerOptions = new JsonSerializerOptions { WriteIndented = true };
 
-        foreach (var (current_namespace, urls) in source)
+        foreach (var (namespaceName, urls) in source)
         {
-            List<DummyContainer> dummies = [];
+            var dummyContainers = new List<DummyContainer>();
             foreach (var url in urls)
             {
-                using HttpClient client = new();
+                using var httpClient = new HttpClient();
 
                 try
                 {
-                    string pageContent = await client.GetStringAsync(url);
-                    HtmlContainer htmlContainer = new(pageContent);
+                    var pageContent = await httpClient.GetStringAsync(url);
+                    var htmlContainer = new HtmlContainer(pageContent);
                     ArgumentNullException.ThrowIfNull(htmlContainer.ContentNode);
 
                     var declaration = htmlContainer.Declaration;
-                    if (declaration == null) continue;
+                    if (declaration == null)
+                        continue;
 
-                    dummies.Add(new DummyContainer(htmlContainer));
+                    dummyContainers.Add(new DummyContainer(htmlContainer));
                 }
-                catch (HttpRequestException e)
+                catch (HttpRequestException exception)
                 {
-                    Console.WriteLine($"Error: {e.Message}");
+                    Console.WriteLine($"Error fetching URL: {exception.Message}");
                 }
             }
 
-            string jsonString = JsonSerializer.Serialize(dummies, options);
+            var serializedData = JsonSerializer.Serialize(dummyContainers, serializerOptions);
+            var preGeneratedDirectory = Path.Combine(Path.GetFullPath(baseDirectory), "PreGenerated");
+            var outputFilePath = Path.Combine(preGeneratedDirectory, $"{namespaceName}.json");
 
-            var finalDirectory = Path.Combine(Path.GetFullPath(directoryPath), "PreGenerated");
-            string filePath = Path.Combine(finalDirectory, $"{current_namespace}.json");
-
-            Directory.CreateDirectory(finalDirectory);
-            File.WriteAllText(filePath, jsonString);
+            Directory.CreateDirectory(preGeneratedDirectory);
+            File.WriteAllText(outputFilePath, serializedData);
         }
     }
+
+    public static void CreateGenerated(string baseDirectory = ".")
+    {
+        var preGeneratedDirectory = Path.Combine(Path.GetFullPath(baseDirectory), "PreGenerated");
+        var generatedDirectory = Path.Combine(Path.GetFullPath(baseDirectory), "Generated");
+
+        var preGeneratedFilePaths = Directory.GetFiles(preGeneratedDirectory, "*.json");
+
+        foreach (var preGeneratedFilePath in preGeneratedFilePaths)
+        {
+            var serializedData = File.ReadAllText(preGeneratedFilePath);
+
+            var dummyContainers = JsonSerializer.Deserialize<List<DummyContainer>>(serializedData);
+            if (dummyContainers == null)
+                continue;
+
+            var sortedContainers = dummyContainers.OrderBy(dummy =>
+            {
+                var (_, fullName, _) = RegexAnalyzer.FromDeclaration(dummy.Declaration);
+                var namespaceParts = fullName.Split('.');
+                return string.Join(".", namespaceParts[..^1]);
+            });
+
+            var fileName = Path.GetFileName(preGeneratedFilePath);
+            CodeBuilder.Build(generatedDirectory, fileName, sortedContainers);
+        }
+    }
+
 
     public static async Task GenerateFrom(Dictionary<string, List<Uri>> source)
     {
@@ -83,7 +113,7 @@ public static class Generator
                     return;
                 }
 
-                EntityType expectedValue = Classifier.ClassifyHtml(page);
+                EntityType expectedValue = Associator.GetEntityType(page);
             }
             catch (HttpRequestException e)
             {

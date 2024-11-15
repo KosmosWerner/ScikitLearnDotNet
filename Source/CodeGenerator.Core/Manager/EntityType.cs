@@ -4,13 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CodeGenerator.Core.Manager
+namespace CodeGenerator.Core.Manager;
+
+public enum EntityType
 {
-    public enum EntityType
-    {
-        None,
-        Class,
-        Method,
-        Exception
-    }
+    None,
+    Class,
+    Method,
+    Exception
 }

@@ -56,7 +56,7 @@ namespace CodeGenerator.Core
             writer.WriteLine();
         }
 
-        HashSet<string> names = new(
+        readonly HashSet<string> names = new(
         [
             "abstract",
             "as",

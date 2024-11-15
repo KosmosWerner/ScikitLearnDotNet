@@ -2,6 +2,8 @@ using CodeGenerator.Core;
 using CodeGenerator.Core.Manager;
 using HtmlAgilityPack;
 using System.Diagnostics;
+using System.Runtime.Serialization;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace CodeGeneratorTest
@@ -13,6 +15,14 @@ namespace CodeGeneratorTest
         public TestFromURL()
         {
             _lazyUrls = new(() => UriSearcher.Search("https://scikit-learn.org/stable/api/sklearn.html"));
+        }
+
+        [Fact]
+        public async Task PreGenerate()
+        {
+            var source = await _lazyUrls.Value;
+
+            await Generator.CreatePreGenerated(source);
         }
 
         [Fact]
@@ -42,7 +52,7 @@ namespace CodeGeneratorTest
 
         private static void NewMethodVsOldMethod(string pageContent)
         {
-            EntityContainer page = new(pageContent);
+            HtmlContainer page = new(pageContent);
             ArgumentNullException.ThrowIfNull(page.ContentNode);
 
             var declaration = page.Declaration;
@@ -55,7 +65,7 @@ namespace CodeGeneratorTest
             }
 
             #region NewMethod
-            EntityType expectedValue = Classifier.ClassifyEntity(page);
+            EntityType expectedValue = Classifier.ClassifyHtml(page);
             #endregion
 
             #region OldMethod
